@@ -10,7 +10,6 @@ def analyzeBacktestDatas(timeFrameUnit,dfBackTest,generalInformations,dfTrades,y
     stratModule = __import__(f'strategies.{stratName}', fromlist=[stratName])
     stratClass = getattr(stratModule, stratName)
     strat = stratClass(df=dfBackTest[timeFrameUnit],
-                     type=["long"],
                      usdt = initialUSDT,
                      coin = 0
                      )
