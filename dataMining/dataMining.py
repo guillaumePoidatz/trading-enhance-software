@@ -9,7 +9,7 @@ def dataMining(exchangeName,symName,tf,startDate):
 
     exchangeName = exchangeName
     exchange_class = getattr(ccxt, exchangeName)
-    exch = exchange_class({'timeout': 10000})
+    exch = exchange_class({}) #'timeout': 100000
     markets = exch.load_markets()
     rateLimit = exch.rateLimit
 

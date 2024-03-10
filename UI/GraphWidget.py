@@ -8,7 +8,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvas
 from PyQt5.QtWidgets import QWidget
     
 class GraphWidget(QWidget):
-    def __init__(self,graphType,xData,yData,title,fontSize,dateFormat,xAxis='',yAxis='',enableZoom = False, enablePushMove = False):
+    def __init__(self,graphType,xData,yData,title,fontSize,dateFormat,xAxis='',yAxis='',enableZoom = False, enablePushMove = False, enableCursor = False):
         super().__init__()
         self.graphType = graphType
         self.xData = xData
@@ -30,6 +30,8 @@ class GraphWidget(QWidget):
         self.recenterY = 0.9
         self.enableZoom = enableZoom
         self.enablePushMove = enablePushMove
+        self.enableCursor = enableCursor
+        
         # load picture of the recenter icon
         self.recenterIcon = mplImage.imread('picture/recenter_icon.png')
 
@@ -44,12 +46,18 @@ class GraphWidget(QWidget):
         if self.graphType=='plot':
             self.ax.plot(self.xData,self.yData)
         elif self.graphType=='bar':
-            xNegData = [self.xData[index] for index,value in enumerate(self.yData) if value <= 0]
-            xPosData = [self.xData[index] for index,value in enumerate(self.yData) if value > 0]
-            yNegData = [value for value in self.yData if value <= 0]
-            yPosData = [value for value in self.yData if value > 0]
+            xNegData = [self.xData[index] for index,value in enumerate(self.yData) if value < 0]
+            xPosData = [self.xData[index] for index,value in enumerate(self.yData) if value >= 0]
+            yNegData = [value for value in self.yData if value < 0]
+            yPosData = [value for value in self.yData if value >= 0]
             self.ax.bar(xNegData,yNegData,color = 'red')
             self.ax.bar(xPosData,yPosData,color = 'green')
+            for x, y in zip(xNegData, yNegData):
+                self.ax.annotate(str(round(y,2))+'%', (x, y), textcoords="offset points", xytext=(0, -12), ha='center')
+            for x, y in zip(xPosData, yPosData):
+                self.ax.annotate(str(round(y,2))+'%', (x, y), textcoords="offset points", xytext=(0, 5), ha='center')
+
+        
 
         if self.xAxis != '':
             self.ax.set_xlabel(self.xAxis)
@@ -72,8 +80,9 @@ class GraphWidget(QWidget):
             self.canvas.mpl_connect('button_release_event', self.onRelease)
             self.canvas.mpl_connect('motion_notify_event', self.onPushMove)
         # define a cursor
-        self.cursor = mplcursors.cursor(self.ax)
-        self.cursor.connect("add", self.onPlotHover)
+        if self.enableCursor:
+            self.cursor = mplcursors.cursor(self.ax)
+            self.cursor.connect("add", self.onPlotHover)
 
     def onPlotHover(self,sel):
         showLabel = not self.isPushedMoving
@@ -86,7 +95,7 @@ class GraphWidget(QWidget):
         elif self.graphType=='bar':
             x_date = x
             sel.annotation.set_text(f"({x_date:.0f}, {y:.2f})")
-
+            
         sel.annotation.set_visible(showLabel)
         if self != None and hasattr(self, 'cursor'):
             self.canvas.draw_idle()

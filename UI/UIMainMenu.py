@@ -1,16 +1,18 @@
 import os
-from PyQt5.QtWidgets import QMainWindow, QAction, QMenu
+from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal
 
-from UI.UISelectionMenu import UISelectionMenu
 from UI.UIBTStrategyMenu import UIBTStrategyMenu
 from UI.UISelectBackTestWindow import UISelectBackTestWindow
 from simulation.BackTest import BackTest
 from Emitter import Emitter
+from UI.SideBarBT import SideBarBT
 
-class UIMainMenu(QMainWindow):
+class UIMainMenu(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
+
+        self.threadBackTest = None
         self.selectedStrat = 'BolTrend'
 
         # List of the saved strategies
@@ -24,17 +26,18 @@ class UIMainMenu(QMainWindow):
         self.emitterInstance = Emitter()
         self.emitterInstance.backTestSignal.connect(self.launchBacktest)
         self.emitterInstance.backTestResultsWindowSignal.connect(self.showSelectionBTWindow)
+        self.emitterInstance.displayBTWindowSignal.connect(self.showBTWindow)
         
         # create a menu for the main window
         menubar = self.menuBar()
 
         # create a scrolling menu "File"
-        fileMenu = menubar.addMenu('File')
+        fileMenu = menubar.addMenu('BenchStrat')
 
         # create an actions inside the scrolling menu "File"
-        newConfiguration = QAction('New configuration', self)
-        newBTStrategy = QAction('New strategy',self)
-        savedStrategy = QAction('Launch saved strategy',self)
+        newConfiguration = QtWidgets.QAction('New configuration', self)
+        newBTStrategy = QtWidgets.QAction('New strategy',self)
+        savedStrategy = QtWidgets.QAction('Launch saved strategy',self)
         
         fileMenu.addAction(newConfiguration)
         fileMenu.addAction(newBTStrategy)
@@ -42,26 +45,57 @@ class UIMainMenu(QMainWindow):
         # create a scrolling menu
         savedStrategy.setMenu(self.createSavedStrategyMenu())
 
-        newConfiguration.triggered.connect(self.showSelectionMenu)
+        newConfiguration.triggered.connect(self.onConfigBtn1Toggled)
         newBTStrategy.triggered.connect(self.showBTStrategyMenu)
 
-        self.setWindowTitle('Main Menu')
+        
+        self.ui = SideBarBT()
+        self.ui.setupUi(self,self.selectedStrat,self.emitterInstance)
 
-    # launch the backTest
-    def launchBacktest(self,configuration):
-        self.threadBackTest = BackTest(
-            configuration['exchange'],
-            configuration['crypto'],
-            configuration['timeframes'],
-            configuration['startDate'],
-            configuration['stratName'],
-            configuration['fees'],
-            self.emitterInstance
-            )
-        self.threadBackTest.start()
+        self.ui.icon_only_widget.hide()
+        # initiate the page
+        self.ui.stackedWidget.setCurrentIndex(0)
+        self.ui.configBtn1.setChecked(True)
+
+        # connect buttons to the actions they have to process
+        self.ui.configBtn1.toggled.connect(self.onConfigBtn1Toggled)
+        self.ui.selectBTbtn1.toggled.connect(self.onSelectBTbtn1Toggled)
+        self.ui.BTwindowBtn1.toggled.connect(self.onBTwindowBtn1Toggled)
+
+    
+    ## Change QPushButton Checkable status when stackedWidget index changed
+    def onStackedWidgetCurrentChanged(self, index):
+        btn_list = self.ui.icon_only_widget.findChildren(QPushButton) \
+                    + self.ui.full_menu_widget.findChildren(QPushButton)
+        
+        for btn in btn_list:
+            if index in [5, 6]:
+                btn.setAutoExclusive(False)
+                btn.setChecked(False)
+            else:
+                btn.setAutoExclusive(True)
+
+    ## functions for changing menu page
+    def onConfigBtn1Toggled(self):
+        self.ui.stackedWidget.setCurrentIndex(0)
+    
+    def onConfigBtn2Toggled(self):
+        self.ui.stackedWidget.setCurrentIndex(0)
+
+    def onSelectBTbtn1Toggled(self):
+        self.ui.stackedWidget.setCurrentIndex(1)
+
+    def onSelectBTbtn2Toggled(self):
+        self.ui.stackedWidget.setCurrentIndex(1)
+
+    def onBTwindowBtn1Toggled(self):
+        self.ui.stackedWidget.setCurrentIndex(2)
+
+    def onBTwindowBtn2Toggled(self):
+        self.ui.stackedWidget.setCurrentIndex(2)
 
     def showSelectionBTWindow(self,results):
-        self.selectionBTWindow = UISelectBackTestWindow(
+        self.ui.selectionBTWindow.updateContents(
             results['dfTrades'],
             results['dfBackTest'],
             results['generalInformations'],
@@ -69,14 +103,34 @@ class UIMainMenu(QMainWindow):
             results['years'],
             results['selectedCrypto'],
             results['timeFrameUnits']
-            )
-        self.selectionBTWindow.show()
+        )
+        self.ui.stackedWidget.setCurrentIndex(1)
 
-    # if we select new configuration :
-    def showSelectionMenu(self):
-        # inside there is a function to emit the backtest signal
-        self.selectionMenu = UISelectionMenu(self.selectedStrat,self.emitterInstance)
-        self.selectionMenu.exec()
+    def showBTWindow(self,BTInformations):
+        self.ui.BTWindow.updateContents(
+            BTInformations['orderBookHistory'],
+            BTInformations['dfBackTest'],
+            BTInformations['generalInformations'],
+            BTInformations['fontSize'],
+            BTInformations['dateFormat'],
+            BTInformations['years'],
+            BTInformations['profitsMonth']
+            )
+        self.ui.BTWindow.setWindowTitle('Backtest '+ BTInformations['tfUnit'] + ' ' + BTInformations['crypto'] + ' strategy')
+           
+    # launch the backTest
+    def launchBacktest(self,configuration):
+        if self.threadBackTest is None or not self.threadBackTest.isRunning():
+            self.threadBackTest = BackTest(
+                configuration['exchange'],
+                configuration['crypto'],
+                configuration['timeframes'],
+                configuration['startDate'],
+                configuration['stratName'],
+                configuration['fees'],
+                self.emitterInstance
+                )
+            self.threadBackTest.start()
 
     # here the interface to build your own strategy
     def showBTStrategyMenu(self):
@@ -86,9 +140,9 @@ class UIMainMenu(QMainWindow):
         
     # just a scrolling menu for saved strategies
     def createSavedStrategyMenu(self):
-        savedStrategyMenu = QMenu(self)
+        savedStrategyMenu = QtWidgets.QMenu(self)
         for strategyName in self.savedStrategies:
-            action = QAction(strategyName, self)
+            action = QtWidgets.QAction(strategyName, self)
             action.setProperty("strategyName", strategyName)
             action.triggered.connect(lambda checked, action=action: self.loadStrategy(action))
             # add the strategy name to the menu

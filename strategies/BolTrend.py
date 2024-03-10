@@ -2,7 +2,7 @@ import ta
       
 class BolTrend():
     """
-This strategy is based on both bollinger and moving average. It is a tendance strategy
+This strategy is based on both bollinger and moving average. It is a trend strategy
 """
     def __init__(
         self,
@@ -24,6 +24,7 @@ This strategy is based on both bollinger and moving average. It is a tendance st
         enterPriceLong = None,
         closePriceShort = None,
         closePriceLong = None,
+        leverage = 1,
     ):
         # dataFrame for testing
         self.df = df
@@ -51,6 +52,9 @@ This strategy is based on both bollinger and moving average. It is a tendance st
         self.enterPriceLong = enterPriceLong
         self.closePriceShort = closePriceShort
         self.closePriceLong = closePriceLong
+
+        # set the leverage you want
+        self.leverage = leverage
         
     def setIndicators(self):
         # -- Clear dataset --
@@ -83,7 +87,7 @@ This strategy is based on both bollinger and moving average. It is a tendance st
         self.shortCondition = False
         self.closeLongCondition = False
         self.closeShortCondition = False
-        
+
         if self.use_long:
             # -- open long market --
             condition1 = df['n1_close'][self.k_point] < df['n1_higher_band'][self.k_point]
@@ -106,7 +110,7 @@ This strategy is based on both bollinger and moving average. It is a tendance st
             condition1 = df['n1_close'][self.k_point] > df['n1_lower_band'][self.k_point]
             condition2 = df['close prices'][self.k_point] < df['lower_band'][self.k_point]
             condition3 = df['close prices'][self.k_point] < df['long_ma'][self.k_point]
-            condition4 = (self.coin>0)
+            condition4 = (self.usdt>0)
             if condition1 & condition2 & condition3 & condition4 :
                 self.shortCondition = True
                 self.isShort = True
@@ -117,5 +121,6 @@ This strategy is based on both bollinger and moving average. It is a tendance st
             if condition1 and condition2:
                 self.closeShortCondition = True
                 self.isShort = False
+
 
         return None

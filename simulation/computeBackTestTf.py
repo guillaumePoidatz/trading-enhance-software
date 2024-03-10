@@ -11,6 +11,10 @@ def computeBackTestTf(strat,dfBackTestTf,usdt,coin,fees):
     tradeCharacteristics = ['date','position','order','close price','fees','usdt size wallet','year','month']
     dfTradesTf = pd.DataFrame(columns = tradeCharacteristics) # order book history for a time frame
     yearsTf = []
+    fees = 1 - fees / 100
+    strat.usdt = usdt
+    strat.coin = coin
+
     
     # useful to compute drawback
     lastAth = 0
@@ -45,31 +49,44 @@ def computeBackTestTf(strat,dfBackTestTf,usdt,coin,fees):
     
     for index,price in enumerate(dfBackTestTf['close prices']) :
         strat.setShortLong()
+
+        #compute the possibility of a liquidation
+        if strat.enterPriceLong!=None and strat.enterPriceLong!=0 :
+            longCurrentRatio = (price*fees-strat.enterPriceLong) / strat.enterPriceLong * strat.leverage
+        else :
+            longCurrentRatio = 0
+        if strat.enterPriceShort!=None and strat.enterPriceShort!=0 :
+            shortCurrentRatio = (strat.enterPriceShort-price*fees) / strat.enterPriceShort * strat.leverage
+        else :
+            shortCurrentRatio = 0
+
+        # the liquidation case
+        if longCurrentRatio + shortCurrentRatio <= -1:
+            computeOneTrade(strat,price,dfBackTestTf,'-',index,tradeCharacteristics,dfTradesTf,fees)
+
+        # if possible compute one trade
         if strat.longCondition == True:
-            # compute one trade
-            usdt,coin,trade2Add,dfTradesTf = computeOneTrade(strat,usdt,coin,price,dfBackTestTf,'long',index,tradeCharacteristics,dfTradesTf,fees)
-            strat.enterPriceLong = price
-            
+            trade2Add,dfTradesTf = computeOneTrade(strat,price,dfBackTestTf,'long',index,tradeCharacteristics,dfTradesTf,fees)
+
         elif strat.shortCondition == True:
-            usdt,coin,trade2Add,dfTradesTf = computeOneTrade(strat,usdt,coin,price,dfBackTestTf,'short',index,tradeCharacteristics,dfTradesTf,fees)
-            strat.enterPriceShort = price
+            trade2Add,dfTradesTf = computeOneTrade(strat,price,dfBackTestTf,'short',index,tradeCharacteristics,dfTradesTf,fees)
 
         elif strat.closeLongCondition == True :
-            usdt,coin,trade2Add,dfTradesTf = computeOneTrade(strat,usdt,coin,price,dfBackTestTf,'close long',index,tradeCharacteristics,dfTradesTf,fees)
-            strat.closePriceLong = price
+            trade2Add,dfTradesTf = computeOneTrade(strat,price,dfBackTestTf,'close long',index,tradeCharacteristics,dfTradesTf,fees)
             profit = (strat.closePriceLong - strat.enterPriceLong) / strat.enterPriceLong * 100
             winTrades,totalProfit,lossTrades,totalLoss = computeWinLossRatio(winTrades,totalProfit,lossTrades,totalLoss,profit)
             winTradesLong,totalProfitLong,lossTradesLong,totalLossLong = computeLongWinLossRatio(winTradesLong,totalProfitLong,lossTradesLong,totalLossLong,profit)
             numberOfLong += 1
+            numberOfTrade += 1
 
         elif strat.closeShortCondition == True :
-            usdt,coin,trade2Add,dfTradesTf = computeOneTrade(strat,usdt,coin,price,dfBackTestTf,'close short',index,tradeCharacteristics,dfTradesTf,fees)
-            strat.closePriceShort = price
+            trade2Add,dfTradesTf = computeOneTrade(strat,price,dfBackTestTf,'close short',index,tradeCharacteristics,dfTradesTf,fees)
             profit = (strat.closePriceShort - strat.enterPriceShort) / strat.enterPriceShort * 100
             winTrades,totalProfit,lossTrades,totalLoss = computeWinLossRatio(winTrades,totalProfit,lossTrades,totalLoss,profit)
             winTradesShort,totalProfitShort,lossTradesShort,totalLossShort = computeShortWinLossRatio(winTradesShort,totalProfitShort,lossTradesShort,totalLossShort,profit)
             numberOfShort += 1
-
+            numberOfTrade += 1
+            
         if strat.longCondition == True or strat.shortCondition == True or strat.closeLongCondition == True or strat.closeShortCondition == True :
             # results for each  year
             yearsTf,profitsYearTf,profitsMonthOneYear,profitsMonthTf,precedent,wallet = computeYearResults(
@@ -81,13 +98,12 @@ def computeBackTestTf(strat,dfBackTestTf,usdt,coin,fees):
                 yearsTf,
                 precedent,
                 wallet)
-            numberOfTrade += 1
 
         strat.k_point += 1
-        # compute ATH (all time high)
-        lastAth = max(lastAth, usdt + coin * price)
-        if (usdt + coin * price) != lastAth :
-            maxDrawback = min(maxDrawback,(usdt + coin * price - lastAth)/lastAth * 100)
+        # compute ATH (all time highest)
+        lastAth = max(lastAth, strat.usdt + strat.coin * price)
+        if (strat.usdt + strat.coin * price) != lastAth :
+            maxDrawback = min(maxDrawback,(strat.usdt + strat.coin * price - lastAth)/lastAth * 100)
 
     backtestDatas = {
         'total profit' : totalProfit,
@@ -102,8 +118,8 @@ def computeBackTestTf(strat,dfBackTestTf,usdt,coin,fees):
         'total loss short' : totalLossShort,
         'win trades short' : winTradesShort,
         'loss trades short' : lossTradesShort,
-        'usdt' : usdt,
-        'coin' : coin,
+        'usdt' : strat.usdt,
+        'coin' : strat.coin,
         'number of trade' : numberOfTrade,
         'number of long' : numberOfLong,
         'number of short' : numberOfShort,

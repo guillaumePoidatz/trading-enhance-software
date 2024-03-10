@@ -2,8 +2,6 @@ import importlib.util
 import os
 import pandas as pd
 from simulation.computeBackTestTf import computeBackTestTf
-import strategies.BolTrend
-
 
 def analyzeBacktestDatas(timeFrameUnit,dfBackTest,generalInformations,dfTrades,years,initialUSDT,initialCoin,profitsMonth,profitsYear,stratName,fees):
 
@@ -44,7 +42,7 @@ def analyzeBacktestDatas(timeFrameUnit,dfBackTest,generalInformations,dfTrades,y
     PnL = (backtestDatas['usdt'] + backtestDatas['coin'] * backtestDatas['last price'] - initialUSDT) / initialUSDT * 100
 
     if backtestDatas['number of trade'] != 0 :
-        winLossRatio = backtestDatas['win trades'] / (backtestDatas['number of trade'] / 2) * 100
+        winLossRatio = backtestDatas['win trades'] / (backtestDatas['number of trade']) * 100
     else :
         winLossRatio = 0
 
@@ -66,7 +64,7 @@ def analyzeBacktestDatas(timeFrameUnit,dfBackTest,generalInformations,dfTrades,y
         'Strat vs Buy and Hold': str(round(StratVsBnH,2)) + ' %',
         'Win/Loss ratio': str(round(winLossRatio,2)) + ' %',
         'Risk Reward': str(round(riskReward,2)),
-        'number of Trades': str(round(backtestDatas['number of trade']/2,2)),
+        'number of Trades': str(round(backtestDatas['number of trade'],2)),
         'Max Drawback': str(round(backtestDatas['max drawback'],2)) + ' %',
         'Win/Loss ratio short': str(round(winLossRatioShort,2)) + ' %',
         'number of Short': str(round(backtestDatas['number of short'],2)),

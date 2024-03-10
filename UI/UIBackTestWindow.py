@@ -1,16 +1,20 @@
 import pandas as pd
-from PyQt5.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QTabWidget
-from PyQt5.QtCore import Qt
-
+from PyQt5 import QtWidgets,QtCore
 from UI.GraphWidget import GraphWidget
 from UI.UITabYearWidget import UITabYearWidget
 
 # class to create a window for backtesting trading strategies
-class UIBackTestWindow(QMainWindow):
-    # MainWindow inherit from QMainWindow
-    def __init__(self,orderBookHistory,dfBackTest,generalInformations,fontSize,dateFormat,years,profitsMonth):
+class UIBackTestWindow(QtWidgets.QWidget):
+    def __init__(self):
         super().__init__()
 
+        # configure the BT widget
+        self.mainLayout = QtWidgets.QVBoxLayout()
+        self.mainLayout.setAlignment(QtCore.Qt.AlignCenter)
+        self.setLayout(self.mainLayout)
+       
+        
+    def updateContents(self,orderBookHistory,dfBackTest,generalInformations,fontSize,dateFormat,years,profitsMonth):
         self.orderBookHistory = orderBookHistory
         self.dfBackTest = dfBackTest
         self.generalInformations = generalInformations
@@ -19,16 +23,21 @@ class UIBackTestWindow(QMainWindow):
         self.years = years
         self.profitsMonth = profitsMonth
 
+        while self.mainLayout.count():
+            child = self.mainLayout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+        
         # -- create the array for general and important informations --
-        mainArrayWidget = QTableWidget()
+        mainArrayWidget = QtWidgets.QTableWidget()
         mainArrayWidget.setRowCount(len(self.generalInformations.columns))
         mainArrayWidget.setColumnCount(len(self.generalInformations))
         # Put datas in the array
         for i, row in enumerate(self.generalInformations.index):
             rowGeneralInformations = self.generalInformations.iloc[row]
             for j, value in enumerate(rowGeneralInformations):
-                item = QTableWidgetItem(str(value))
-                item.setTextAlignment(Qt.AlignCenter)  # alignment (center)
+                item = QtWidgets.QTableWidgetItem(str(value))
+                item.setTextAlignment(QtCore.Qt.AlignCenter)  # alignment (center)
                 mainArrayWidget.setItem(i, j, item)
 
         mainArrayWidget.horizontalHeader().setVisible(False)
@@ -38,7 +47,7 @@ class UIBackTestWindow(QMainWindow):
         
         # -- create the array containing all the trade of the backtest -- 
         # create the QTableWidget
-        tradeBookWidget = QTableWidget()
+        tradeBookWidget = QtWidgets.QTableWidget()
 
         # configure the array
         tradeBookWidget.setRowCount(len(orderBookHistory))
@@ -48,14 +57,14 @@ class UIBackTestWindow(QMainWindow):
         for i, row in enumerate(self.orderBookHistory.index):
             rowDfBackTest = self.orderBookHistory.iloc[row]
             for j, value in enumerate(rowDfBackTest):
-                item = QTableWidgetItem(str(value))
-                item.setTextAlignment(Qt.AlignCenter)  # alignment (center)
+                item = QtWidgets.QTableWidgetItem(str(value))
+                item.setTextAlignment(QtCore.Qt.AlignCenter)  # alignment (center)
                 tradeBookWidget.setItem(i, j, item)
 
         # Replace colonm number by colonm title
         tradeBookWidget.setHorizontalHeaderLabels(self.orderBookHistory.columns)
 
-        # Set cells size
+         # Set cells size
         tradeBookWidget.resizeColumnsToContents()
 
         # -- Create the Matplotlib graphic for evolution of wallet --
@@ -70,7 +79,8 @@ class UIBackTestWindow(QMainWindow):
             self.fontSize,
             self.dateFormat,
             enableZoom = True,
-            enablePushMove = True
+            enablePushMove = True,
+            enableCursor = True
             )
 
         initialWallet = self.orderBookHistory['usdt size wallet'][0]
@@ -80,22 +90,22 @@ class UIBackTestWindow(QMainWindow):
         walletGraph.drawRecenterIcon()
         
         # create the vertical layout for the arrays
-        arrayLayout = QVBoxLayout()
+        arrayLayout = QtWidgets.QVBoxLayout()
         arrayLayout.addWidget(mainArrayWidget)
         arrayLayout.addWidget(tradeBookWidget)
         
         # create the horizontal layout (container) to organize the display of the widgets
-        generaLayout = QHBoxLayout()
-        generaLayout.addWidget(walletGraph.canvas)
-        generaLayout.addLayout(arrayLayout)
+        generalBTLayout = QtWidgets.QHBoxLayout()
+        generalBTLayout.addWidget(walletGraph.canvas)
+        generalBTLayout.addLayout(arrayLayout)
 
         # create a widget to contain the arrays and graphics (tab)
-        tabMain = QWidget()
+        tabMain = QtWidgets.QWidget()
         tabYears = []
-        tabMain.setLayout(generaLayout)
+        tabMain.setLayout(generalBTLayout)
 
         # Add the tabs to the tab widget
-        tabWidget = QTabWidget()
+        tabWidget = QtWidgets.QTabWidget()
         tabWidget.addTab(tabMain,'General Informations')
         for index in range(len(years)) :
             tabYearX = UITabYearWidget(self.profitsMonth[years[index][0]],self.fontSize,self.dateFormat)
@@ -103,6 +113,9 @@ class UIBackTestWindow(QMainWindow):
             tabTitle = 'Informations for ' + str(years[index][0])
             tabWidget.addTab(tabYears[index],tabTitle)
 
-        # configure the main window
-        self.setCentralWidget(tabWidget)
+        self.mainLayout.addWidget(tabWidget)
+        
+        return None
+
+
 

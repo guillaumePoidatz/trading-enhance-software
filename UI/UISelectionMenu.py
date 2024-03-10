@@ -1,12 +1,11 @@
-from PyQt5.QtWidgets import QDialog, QWidget, QPushButton, QCheckBox, QComboBox, QLabel, QVBoxLayout, QHBoxLayout, QLineEdit, QDateEdit
-from PyQt5.QtCore import QThread, pyqtSignal, QObject
+from PyQt5 import QtWidgets, QtCore
 from functools import partial
 
 from UpdateMarketThread import UpdateMarketThread
 from Emitter import Emitter
 
     
-class UISelectionMenu(QDialog):
+class UISelectionMenu(QtWidgets.QWidget):
     def __init__(self,selectedStrat,emitterInstance):
         super().__init__()
         self.selectedStrat = selectedStrat
@@ -15,9 +14,9 @@ class UISelectionMenu(QDialog):
         self.setWindowTitle('Select your configuration')
 
         # combo box for exchange
-        self.comboBoxExchange = QComboBox()
+        self.comboBoxExchange = QtWidgets.QComboBox()
 
-        labelExchange = QLabel("Select an exchange :")
+        labelExchange = QtWidgets.QLabel("Select an exchange :")
         self.comboBoxExchange.addItem("binance")
         self.comboBoxExchange.addItem("bitfinex")
         #self.comboBoxExchange.addItem("bitget")
@@ -29,15 +28,6 @@ class UISelectionMenu(QDialog):
         #self.comboBoxExchange.addItem("mexc")
         #self.comboBoxExchange.addItem("okx")
 
-        # check box crypto
-        self.comboBoxCrypto = QComboBox()
-        labelCrypto = QLabel("Select a crypto :")
-        # fast research among the available pairs
-        self.lineEditCryptoSearch = QLineEdit()
-        self.lineEditCryptoSearch.setPlaceholderText("")
-        # add a research function inside the crypto comboBox (pairs of crypto)
-        self.comboBoxCrypto.setLineEdit(self.lineEditCryptoSearch)
-
         # to stock the markets of the exchanges that have been selected
         self.markets = dict()
 
@@ -48,8 +38,8 @@ class UISelectionMenu(QDialog):
         self.comboBoxExchange.currentTextChanged.connect(self.updateCryptoComboBox)
 
         # start date
-        self.startDate = QDateEdit()
-        labelDate = QLabel("Select a date :")
+        self.startDate = QtWidgets.QDateEdit()
+        labelDate = QtWidgets.QLabel("Select a date :")
         # date formatting
         self.startDate.setDisplayFormat("yyyy-MM-dd")
         # default date = current date
@@ -59,65 +49,107 @@ class UISelectionMenu(QDialog):
         tfUnits = ['5m','15m','1h','4h','1d','1w']
         self.allCheckBoxes = [None] * len(tfUnits)
         for tfUnitIndex in range(len(tfUnits)) :
-            self.checkbox = QCheckBox(tfUnits[tfUnitIndex])
+            self.checkbox = QtWidgets.QCheckBox(tfUnits[tfUnitIndex])
             self.allCheckBoxes[tfUnitIndex] = self.checkbox
 
-        # Field for fees
-        labelFees = QLabel("Fees percentage :")
-        self.lineEditFees = QLineEdit()
-        self.lineEditFees.setText("0") # default value
+        # Field for tab containing cryptos and wallet size dedicated
+        self.tableCryptoSize = QtWidgets.QTableWidget(1, 2)
+        self.tableCryptoSize.setColumnWidth(0, 120)
+        self.tableCryptoSize.verticalHeader().hide()
+        self.tableCryptoSize.setHorizontalHeaderLabels(["Crypto","Size (%)"])
+        self.tableCryptoSize.setFixedSize(220,self.tableCryptoSize.height())
+        protoItem = QtWidgets.QTableWidgetItem()
+        protoItem.setSizeHint(QtCore.QSize(150, 50))
+        protoItem.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableCryptoSize.setItemPrototype(protoItem)
+        
+        # Field for cryptos
+        self.comboBoxCryptos=[]
+        comboBoxCrypto = QtWidgets.QComboBox()
+        comboBoxCrypto.setFixedSize(120, 30)
+        self.comboBoxCryptos.append(comboBoxCrypto)
+        
+        # fast research among the available pairs
+        lineEditCryptoSearch = QtWidgets.QLineEdit()
+        lineEditCryptoSearch.setPlaceholderText("")
+        
+        # add a research function inside the crypto comboBox (pairs of crypto)
+        comboBoxCrypto.setLineEdit(lineEditCryptoSearch)
 
-        # Layout for fees
-        layoutFees = QVBoxLayout()
-        layoutFees.addWidget(labelFees)
-        layoutFees.addWidget(self.lineEditFees)
+        # add to table
+        self.tableCryptoSize.setCellWidget(0, 0, comboBoxCrypto)
+
+        # Field for fees
+        labelFees = QtWidgets.QLabel("Fees percentage :")
+        self.lineEditFees = QtWidgets.QLineEdit()
+        self.lineEditFees.setAlignment(QtCore.Qt.AlignCenter)
+        self.lineEditFees.setText("0") # default value
+        self.lineEditFees.setFixedSize(100, 20)
         
         # push button
-        self.buttonOK = QPushButton('OK')
+        self.buttonOK = QtWidgets.QPushButton('Load Backtest')
         self.buttonOK.clicked.connect(partial(self.checkConditions2Close, tfUnits))
-        self.buttonOK.setFixedSize(100, 30)
+        self.buttonOK.setFixedSize(120, 30)
+        self.plusButton = QtWidgets.QPushButton('+')
+        self.plusButton.clicked.connect(self.addAsset)
+        self.plusButton.setFixedSize(40, 30)
+        self.minusButton = QtWidgets.QPushButton('-')
+        self.minusButton.clicked.connect(self.removeAsset)
+        self.minusButton.setFixedSize(40, 30)
 
+        self.spacerItem = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        
         # layout exchange
-        layoutExchange = QVBoxLayout()
-        layoutExchange.setSpacing(0) 
+        layoutExchange = QtWidgets.QVBoxLayout()
         layoutExchange.addWidget(labelExchange)
         layoutExchange.addWidget(self.comboBoxExchange)
-        
-        # layout for cryptos box
-        layoutCrypto = QVBoxLayout()
-        layoutCrypto.addWidget(labelCrypto)
-        layoutCrypto.addWidget(self.comboBoxCrypto)
-        layoutCrypto.setSpacing(0)
+        layoutExchange.setAlignment(QtCore.Qt.AlignCenter)
 
         # layout start date
-        layoutStartDate = QVBoxLayout()
+        layoutStartDate = QtWidgets.QVBoxLayout()
         layoutStartDate.addWidget(labelDate)
         layoutStartDate.addWidget(self.startDate)
+        layoutStartDate.setAlignment(QtCore.Qt.AlignCenter)
         
-        # Create a horizontal layout (container) to organize crypto checkboxes
-        layoutExchCryptoDate = QHBoxLayout()
-        layoutExchCryptoDate.addStretch()
-        layoutExchCryptoDate.addLayout(layoutExchange)
-        layoutExchCryptoDate.addLayout(layoutCrypto)
-        layoutExchCryptoDate.addLayout(layoutStartDate)
-        layoutExchCryptoDate.addStretch()
-
+        # Create a horizontal layout (container) to organize Exchange and startDate
+        layoutExchDate = QtWidgets.QHBoxLayout()
+        layoutExchDate.addItem(self.spacerItem)
+        layoutExchDate.addLayout(layoutExchange)
+        layoutExchDate.addItem(self.spacerItem)
+        layoutExchDate.addLayout(layoutStartDate)
+        layoutExchDate.addItem(self.spacerItem)
+        layoutExchDate.setAlignment(QtCore.Qt.AlignCenter)
+        
         # layout for the timeFrames check boxes
-        layoutHTimeframes = QHBoxLayout()
-        layoutVTimeframes = QVBoxLayout()
+        layoutHTimeframes = QtWidgets.QHBoxLayout()
+        layoutHTimeframes.addItem(self.spacerItem)
         for tfUnitIndex in range(len(tfUnits)) :
             layoutHTimeframes.addWidget(self.allCheckBoxes[tfUnitIndex])
-        layoutVTimeframes.addLayout(layoutHTimeframes)
+        layoutHTimeframes.addItem(self.spacerItem)
 
-        # layout for the button ok
-        layoutOK = QHBoxLayout()
-        layoutOK.addWidget(self.buttonOK)
+        # layout for crypto + size
+        layoutCryptoSize = QtWidgets.QHBoxLayout()
+        layoutCryptoSize.addWidget(self.tableCryptoSize)
+        layoutCryptoSize.setAlignment(QtCore.Qt.AlignCenter)
+
+        # layout for the push buttons
+        layoutPush = QtWidgets.QHBoxLayout()
+        layoutPush.addWidget(self.minusButton)
+        layoutPush.addWidget(self.plusButton)
+        layoutPush.addWidget(self.buttonOK)
+
+        # Layout for fees
+        layoutFees = QtWidgets.QVBoxLayout()
+        layoutFees.addWidget(labelFees)
+        layoutFees.addWidget(self.lineEditFees)
+        layoutFees.setAlignment(QtCore.Qt.AlignCenter)
 
         # Create a vertical layout to organize all the layouts (crypto and timeframes)
-        mainLayout = QVBoxLayout()
-        mainLayout.addLayout(layoutExchCryptoDate)
-        mainLayout.addLayout(layoutVTimeframes)
-        mainLayout.addLayout(layoutOK)
+        mainLayout = QtWidgets.QVBoxLayout()
+        mainLayout.addLayout(layoutExchDate)
+        mainLayout.addLayout(layoutHTimeframes)
+        mainLayout.addLayout(layoutCryptoSize)
+        mainLayout.addLayout(layoutPush)
         mainLayout.addLayout(layoutFees)
         
         # put sub widgets inside the main widget
@@ -126,8 +158,8 @@ class UISelectionMenu(QDialog):
 
     # dynamic adaptation of crypto box to the content of exchange box
     def updateCryptoComboBox(self):
-
-        self.comboBoxCrypto.clear()
+        for pair in self.comboBoxCryptos:
+            pair.clear()
         self.exchangeName = self.comboBoxExchange.currentText()
 
         # for a new exchange, we have to retrieve the market
@@ -145,21 +177,71 @@ class UISelectionMenu(QDialog):
             # record the available market for this exchange
             self.markets[self.exchangeName] = market
             # add the market to the UI
-            self.comboBoxCrypto.addItems(market)
+            for pair in self.comboBoxCryptos:
+                pair.addItems(market)
         else :
-            self.comboBoxCrypto.addItems(self.markets[self.exchangeName])
+            for pair in self.comboBoxCryptos:
+                pair.addItems(self.markets[self.exchangeName])
             
     def checkConditions2Close(self,tfUnits):
-        condition1 = self.comboBoxCrypto.findText(self.comboBoxCrypto.currentText()) != -1
         condition2 = self.comboBoxExchange.currentIndex()>=0
-        condition3 = False
-        if condition1 and condition2 :
+        condition1 = True
+        condition3 = True
+        condition4 = True
+        condition5 = False
+
+        
+        def strIsPercent(string):
+            if string is not None:
+                try:
+                    number = float(string.text())
+                    if 0<=number and number<=100:
+                        return True
+                    else:
+                        return False
+                except ValueError:
+                    return False
+            return False
+        
+        if condition1 :
+            for row,comboBoxCrypto in enumerate(self.comboBoxCryptos):
+                if comboBoxCrypto.findText(comboBoxCrypto.currentText())== -1:
+                    condition2 = False
+                if not strIsPercent(self.tableCryptoSize.item(row, 1)):
+                    condition3 = False
+            if condition2 and condition3 :
+                if not strIsPercent(self.lineEditFees):
+                    condition4 = False
+        if condition1 and condition2 and condition3 and condition4:
             for tfUnit in range(len(tfUnits)) :
                 if self.allCheckBoxes[tfUnit].isChecked():
-                    condition3 = True
-                    self.loadNewBackTest(tfUnits)
-                    return None
+                    condition5 = True
+                    self.loadNewBackTest(tfUnits)                
 
+    def addAsset(self):
+        comboBoxCrypto = QtWidgets.QComboBox()
+        comboBoxCrypto.setFixedSize(120, 30)
+        lineEditCryptoSearch = QtWidgets.QLineEdit()
+        lineEditCryptoSearch.setPlaceholderText("")
+        comboBoxCrypto.setLineEdit(lineEditCryptoSearch)
+        
+        if len(self.markets)!=0:
+            comboBoxCrypto.addItems(self.markets[self.exchangeName])
+
+        rowIndex = self.tableCryptoSize.rowCount()
+        self.tableCryptoSize.insertRow(rowIndex)
+
+        self.tableCryptoSize.setCellWidget(rowIndex, 0, comboBoxCrypto)
+        self.comboBoxCryptos.append(comboBoxCrypto)
+
+
+    def removeAsset(self):
+        lastRowIndex = self.tableCryptoSize.rowCount() - 1
+        if lastRowIndex >= 0:
+            self.tableCryptoSize.removeRow(lastRowIndex)
+            self.comboBoxCryptos = self.comboBoxCryptos[0:len(self.comboBoxCryptos)-1]
+        self.tableCryptoSize.setColumnWidth(0, 120)
+        
     # load a new configurations if all the conditions are verified
     def loadNewBackTest(self,tfUnits):
         selectedTf = []
@@ -173,10 +255,10 @@ class UISelectionMenu(QDialog):
 
         # configuration
         configuration['exchange'] = self.comboBoxExchange.currentText()
-        configuration['crypto'] = self.comboBoxCrypto.currentText()
+        configuration['crypto'] = self.comboBoxCryptos[0].currentText()
+        configuration['wallet size'] = [self.tableCryptoSize.item(row, 1).text() for row in range(self.tableCryptoSize.rowCount())]
         configuration['timeframes'] = selectedTf
         configuration['startDate'] = self.startDate.date()
         configuration['stratName'] = self.selectedStrat
         configuration['fees'] = float(self.lineEditFees.text())
         self.emitterInstance.backTestSignal.emit(configuration)
-        self.accept()

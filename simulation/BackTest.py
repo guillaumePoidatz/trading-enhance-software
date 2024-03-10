@@ -4,7 +4,6 @@ import ccxt
 import datetime as dt
 import pandas as pd
 
-
 from dataMining.dataMining import dataMining
 from readJsonFile import readJsonFile
 from simulation.analyzeBacktestDatas import analyzeBacktestDatas
@@ -97,4 +96,3 @@ class BackTest(QThread):
             self.stratName,
             self.fees)
         self.emitterInstance.backTestResultsWindowSignal.emit(results)
-

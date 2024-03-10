@@ -1,17 +1,16 @@
 import ta
- # add your own indicator and conditions to take the trade
-class YourStrategy():
-    """
-This strategy is based on both bollinger and moving average. It is a tendance strategy
-"""
+
+
+class MovingAvgCross():
+
     def __init__(
         self,
         df,
         usdt,
         coin,
         k_point = 0,
+        ma_window = 9,
         type=["long"],
-        leverage = 1,
         longCondition = False,
         shortCondition = False,
         closeLongCondition = False,
@@ -45,6 +44,7 @@ This strategy is based on both bollinger and moving average. It is a tendance st
         self.enterPriceLong = enterPriceLong
         self.closePriceShort = closePriceShort
         self.closePriceLong = closePriceLong
+        self.ma_window = ma_window
 
         # set the leverage you want
         self.leverage = leverage
@@ -54,10 +54,14 @@ This strategy is based on both bollinger and moving average. It is a tendance st
         df = self.df
 
         # your indicators
+        df['ma'] = ta.trend.sma_indicator(close=df['close prices'], window=self.ma_window)
+
+        df['n1_close'] = df['close prices'].shift(1)
+        df['n1_ma'] = df['ma'].shift(1)
         
         self.df = df    
         return self.df
-    
+
     def setShortLong(self): 
         df = self.df
         # -- Initiate populate --
@@ -69,32 +73,36 @@ This strategy is based on both bollinger and moving average. It is a tendance st
         if self.use_long:
             # -- open long market --
             # write your conditions here
-            condition4 = (self.usdt>0)
-            if  :
+            condition1 = df['n1_close'][self.k_point] < df['n1_ma'][self.k_point]
+            condition2 =  df['close prices'][self.k_point] > df['ma'][self.k_point]
+            condition3 = (self.usdt>0)
+            if condition1 and condition2 and condition3:
                 self.longCondition = True
                 self.isLong = True
             
             # -- close long market --
             # write your conditions here
-            condition2 = self.isLong
-            if condition1 and condition2:
+            condition1 = df['n1_close'][self.k_point] > df['n1_ma'][self.k_point]
+            condition2 = df['close prices'][self.k_point] < df['ma'][self.k_point]
+            condition3 = self.isLong
+            if condition1 and condition2 and condition3:
                 self.closeLongCondition = True
                 self.isLong = False
         
         if self.use_short:
+            toto = False
             # -- open short market --
-            # write your conditions here
             condition4 = (self.usdt>0)
-            if :
+            # write your conditions here
+            if toto:
                 self.shortCondition = True
                 self.isShort = True
 
             # -- close short market --
             # write your conditions here
             condition2 = self.isShort
-            if :
+            if toto:
                 self.closeShortCondition = True
                 self.isShort = False
 
-        return None
-
+            return None
