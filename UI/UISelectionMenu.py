@@ -96,8 +96,6 @@ class UISelectionMenu(QtWidgets.QWidget):
         self.minusButton = QtWidgets.QPushButton('-')
         self.minusButton.clicked.connect(self.removeAsset)
         self.minusButton.setFixedSize(40, 30)
-
-        self.spacerItem = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         
         # layout exchange
         layoutExchange = QtWidgets.QVBoxLayout()
@@ -113,19 +111,14 @@ class UISelectionMenu(QtWidgets.QWidget):
         
         # Create a horizontal layout (container) to organize Exchange and startDate
         layoutExchDate = QtWidgets.QHBoxLayout()
-        layoutExchDate.addItem(self.spacerItem)
         layoutExchDate.addLayout(layoutExchange)
-        layoutExchDate.addItem(self.spacerItem)
         layoutExchDate.addLayout(layoutStartDate)
-        layoutExchDate.addItem(self.spacerItem)
         layoutExchDate.setAlignment(QtCore.Qt.AlignCenter)
         
         # layout for the timeFrames check boxes
         layoutHTimeframes = QtWidgets.QHBoxLayout()
-        layoutHTimeframes.addItem(self.spacerItem)
         for tfUnitIndex in range(len(tfUnits)) :
             layoutHTimeframes.addWidget(self.allCheckBoxes[tfUnitIndex])
-        layoutHTimeframes.addItem(self.spacerItem)
 
         # layout for crypto + size
         layoutCryptoSize = QtWidgets.QHBoxLayout()
@@ -262,3 +255,6 @@ class UISelectionMenu(QtWidgets.QWidget):
         configuration['stratName'] = self.selectedStrat
         configuration['fees'] = float(self.lineEditFees.text())
         self.emitterInstance.backTestSignal.emit(configuration)
+
+    def updateStrat(self,stratName):
+        self.selectedStrat = stratName
