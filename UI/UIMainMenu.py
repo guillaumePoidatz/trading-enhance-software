@@ -1,10 +1,11 @@
 import os
+import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal
 
 from UI.UIBTStrategyMenu import UIBTStrategyMenu
 from UI.UISelectBackTestWindow import UISelectBackTestWindow
-from simulation.BackTest import BackTest
+#from simulation.BackTest import BackTest
 from Emitter import Emitter
 from UI.SideBarBT import SideBarBT
 
@@ -13,14 +14,28 @@ class UIMainMenu(QtWidgets.QMainWindow):
         super().__init__()
 
         self.threadBackTest = None
-        self.selectedStrat = 'BolTrend'
+        selectedStrat = 'BolTrend'
+
+
+        if hasattr(sys, '_MEIPASS'):
+            base_path = sys._MEIPASS
+        else:
+            base_path = os.path.abspath(".")
+
+        strategies_path = os.path.join(base_path, 'strategies')
 
         # List of the saved strategies
         self.savedStrategies  = list()
-        for file in os.listdir("strategies"):
-            if file.endswith(".py"):
-                fileName, _ = os.path.splitext(file)
-                self.savedStrategies.append(fileName)
+        try :
+            for file in os.listdir(strategies_path):
+                if file.endswith(".py"):
+                    fileName, _ = os.path.splitext(file)
+                    self.savedStrategies.append(fileName)
+        except :
+            print(os.listdir(base_path))
+            for root, dirs, files in os.walk(base_path):
+                for file in files:
+                    print(os.path.join(root, file))
                 
         # for the multithreading
         self.emitterInstance = Emitter()
@@ -50,7 +65,7 @@ class UIMainMenu(QtWidgets.QMainWindow):
 
         
         self.ui = SideBarBT()
-        self.ui.setupUi(self,self.selectedStrat,self.emitterInstance)
+        self.ui.setupUi(self,selectedStrat,self.emitterInstance)
 
         self.ui.icon_only_widget.hide()
         # initiate the page
@@ -61,7 +76,7 @@ class UIMainMenu(QtWidgets.QMainWindow):
         self.ui.configBtn1.toggled.connect(self.onConfigBtn1Toggled)
         self.ui.selectBTbtn1.toggled.connect(self.onSelectBTbtn1Toggled)
         self.ui.BTwindowBtn1.toggled.connect(self.onBTwindowBtn1Toggled)
-
+        
     
     ## Change QPushButton Checkable status when stackedWidget index changed
     def onStackedWidgetCurrentChanged(self, index):
@@ -76,6 +91,8 @@ class UIMainMenu(QtWidgets.QMainWindow):
                 btn.setAutoExclusive(True)
 
     ## functions for changing menu page
+
+            
     def onConfigBtn1Toggled(self):
         self.ui.stackedWidget.setCurrentIndex(0)
     
@@ -151,4 +168,5 @@ class UIMainMenu(QtWidgets.QMainWindow):
 
      # in charge of loading a presaved strategy
     def loadStrategy(self,action):
-        self.selectedStrat = action.property("strategyName")
+        self.ui.BTconfigurationPage.updateStrat(action.property("strategyName"))
+

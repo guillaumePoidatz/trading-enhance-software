@@ -4,7 +4,6 @@ import pandas as pd
 from simulation.computeBackTestTf import computeBackTestTf
 
 def analyzeBacktestDatas(timeFrameUnit,dfBackTest,generalInformations,dfTrades,years,initialUSDT,initialCoin,profitsMonth,profitsYear,stratName,fees):
-
     stratModule = __import__(f'strategies.{stratName}', fromlist=[stratName])
     stratClass = getattr(stratModule, stratName)
     strat = stratClass(df=dfBackTest[timeFrameUnit],
@@ -60,6 +59,7 @@ def analyzeBacktestDatas(timeFrameUnit,dfBackTest,generalInformations,dfTrades,y
 
     gI = {
         'Period': Period,
+        'stratégy':stratName,
         'PnL': str(round(PnL,2)) + ' %',
         'Strat vs Buy and Hold': str(round(StratVsBnH,2)) + ' %',
         'Win/Loss ratio': str(round(winLossRatio,2)) + ' %',

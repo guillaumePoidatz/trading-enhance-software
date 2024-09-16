@@ -1,5 +1,5 @@
 # installing venv : python3 -m venv Documents/VENV/BackTest
-# source Documents/VENV/BackTestV3/bin/activate
+# source Documents/VENV/BackTest/bin/activate
 # then
 # cd Documents/VENV/BackTest
 # and finally
@@ -7,6 +7,7 @@
 
 
 import sys
+import os
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QFile, QTextStream
 from UI.UIMainMenu import UIMainMenu
@@ -18,8 +19,15 @@ def resize2screen(menu):
 if __name__ == "__main__":
     # create PyQt interface
     app = QApplication(sys.argv)
-    ## loading style file, Example 2
-    style_file = QFile("css/style.qss")
+
+    ## loading style file
+    if hasattr(sys, '_MEIPASS'):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(".")
+    css_path = os.path.join(base_path, 'css/style.qss')
+    
+    style_file = QFile(css_path)
     style_file.open(QFile.ReadOnly | QFile.Text)
     style_stream = QTextStream(style_file)
     app.setStyleSheet(style_stream.readAll())
@@ -30,5 +38,7 @@ if __name__ == "__main__":
     mainMenu.show()
     # exec PyQt interface
     app.exec_()
+
+    
     
 
