@@ -3,9 +3,9 @@ import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal
 
-from UI.UIBTStrategyMenu import UIBTStrategyMenu
 from UI.UISelectBackTestWindow import UISelectBackTestWindow
-#from simulation.BackTest import BackTest
+from UI.CodeEditor import CodeEditor
+from UI.highlighter.pyHighlight import PythonHighlighter
 from Emitter import Emitter
 from UI.SideBarBT import SideBarBT
 
@@ -15,7 +15,6 @@ class UIMainMenu(QtWidgets.QMainWindow):
 
         self.threadBackTest = None
         selectedStrat = 'BolTrend'
-
 
         if hasattr(sys, '_MEIPASS'):
             base_path = sys._MEIPASS
@@ -51,21 +50,19 @@ class UIMainMenu(QtWidgets.QMainWindow):
 
         # create an actions inside the scrolling menu "File"
         newConfiguration = QtWidgets.QAction('New configuration', self)
-        newBTStrategy = QtWidgets.QAction('New strategy',self)
         savedStrategy = QtWidgets.QAction('Launch saved strategy',self)
         
         fileMenu.addAction(newConfiguration)
-        fileMenu.addAction(newBTStrategy)
         fileMenu.addAction(savedStrategy)
+        
         # create a scrolling menu
         savedStrategy.setMenu(self.createSavedStrategyMenu())
 
         newConfiguration.triggered.connect(self.onConfigBtn1Toggled)
-        newBTStrategy.triggered.connect(self.showBTStrategyMenu)
 
         
         self.ui = SideBarBT()
-        self.ui.setupUi(self,selectedStrat,self.emitterInstance)
+        self.ui.setupUi(self,selectedStrat,self.emitterInstance,strategies_path)
 
         self.ui.icon_only_widget.hide()
         # initiate the page
@@ -74,6 +71,7 @@ class UIMainMenu(QtWidgets.QMainWindow):
 
         # connect buttons to the actions they have to process
         self.ui.configBtn1.toggled.connect(self.onConfigBtn1Toggled)
+        self.ui.RLBtn1.toggled.connect(self.onRLBtn1Toggled)
         self.ui.selectBTbtn1.toggled.connect(self.onSelectBTbtn1Toggled)
         self.ui.BTwindowBtn1.toggled.connect(self.onBTwindowBtn1Toggled)
         
@@ -99,17 +97,23 @@ class UIMainMenu(QtWidgets.QMainWindow):
     def onConfigBtn2Toggled(self):
         self.ui.stackedWidget.setCurrentIndex(0)
 
-    def onSelectBTbtn1Toggled(self):
+    def onRLBtn1Toggled(self):
         self.ui.stackedWidget.setCurrentIndex(1)
+    
+    def onRLBtn2Toggled(self):
+        self.ui.stackedWidget.setCurrentIndex(1)
+
+    def onSelectBTbtn1Toggled(self):
+        self.ui.stackedWidget.setCurrentIndex(2)
 
     def onSelectBTbtn2Toggled(self):
-        self.ui.stackedWidget.setCurrentIndex(1)
+        self.ui.stackedWidget.setCurrentIndex(2)
 
     def onBTwindowBtn1Toggled(self):
-        self.ui.stackedWidget.setCurrentIndex(2)
+        self.ui.stackedWidget.setCurrentIndex(3)
 
     def onBTwindowBtn2Toggled(self):
-        self.ui.stackedWidget.setCurrentIndex(2)
+        self.ui.stackedWidget.setCurrentIndex(3)
 
     def showSelectionBTWindow(self,results):
         self.ui.selectionBTWindow.updateContents(
@@ -148,12 +152,6 @@ class UIMainMenu(QtWidgets.QMainWindow):
                 self.emitterInstance
                 )
             self.threadBackTest.start()
-
-    # here the interface to build your own strategy
-    def showBTStrategyMenu(self):
-        self.BTStrategyMenu = UIBTStrategyMenu(self.emitterInstance)
-        self.BTStrategyMenu.exec()
-
         
     # just a scrolling menu for saved strategies
     def createSavedStrategyMenu(self):

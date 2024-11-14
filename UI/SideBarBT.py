@@ -2,10 +2,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from UI.UISelectBackTestWindow import UISelectBackTestWindow
 from UI.UIBackTestWindow import UIBackTestWindow
 from UI.UISelectionMenu import UISelectionMenu
+from UI.UIRLMenu import UIRLMenu
 
 class SideBarBT(object):
 
-    def setupUi(self, MainWindow,selectedStrat,emitterInstance):
+    def setupUi(self, MainWindow,selectedStrat,emitterInstance,strategies_path):
         
         self.ObjectNameString = "BenchStrat"
         MainWindow.setObjectName(self.ObjectNameString)
@@ -51,36 +52,49 @@ class SideBarBT(object):
         # close side bar : icon for the configuration menu 
         self.configBtn1 = QtWidgets.QPushButton(self.icon_only_widget)
         self.configBtn1.setText("")
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("UI/icon/home-4-32.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
-        icon.addPixmap(QtGui.QPixmap("UI/icon/home-4-48.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.On)
-        self.configBtn1.setIcon(icon)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap("UI/icon/home-4-32.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon1.addPixmap(QtGui.QPixmap("UI/icon/home-4-48.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.On)
+        self.configBtn1.setIcon(icon1)
         self.configBtn1.setIconSize(QtCore.QSize(20, 20))
         self.configBtn1.setCheckable(True)
         self.configBtn1.setAutoExclusive(True)
         self.configBtn1.setObjectName("configBtn1")
         self.verticalLayout.addWidget(self.configBtn1)
 
-        # close side bar : icon for the backTest Selection Menu
+        # close side bar : icon for the RL-based strategy menu
+        self.RLBtn1 = QtWidgets.QPushButton(self.icon_only_widget)
+        self.RLBtn1.setText("")
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap("UI/icon/product-32.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon2.addPixmap(QtGui.QPixmap("UI/icon/product-48.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.On)
+        self.RLBtn1.setIcon(icon2)
+        self.RLBtn1.setIconSize(QtCore.QSize(20, 20))
+        self.RLBtn1.setCheckable(True)
+        self.RLBtn1.setAutoExclusive(True)
+        self.RLBtn1.setObjectName("RLBtn1")
+        self.verticalLayout.addWidget(self.RLBtn1)
+
+        # close side bar : icon for the backTest Menu
         self.selectBTbtn1 = QtWidgets.QPushButton(self.icon_only_widget)
         self.selectBTbtn1.setText("")
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("UI/icon/dashboard-5-32.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
-        icon1.addPixmap(QtGui.QPixmap("UI/icon/dashboard-5-48.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.On)
-        self.selectBTbtn1.setIcon(icon1)
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap("UI/icon/dashboard-5-32.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon3.addPixmap(QtGui.QPixmap("UI/icon/dashboard-5-48.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.On)
+        self.selectBTbtn1.setIcon(icon3)
         self.selectBTbtn1.setIconSize(QtCore.QSize(20, 20))
         self.selectBTbtn1.setCheckable(True)
         self.selectBTbtn1.setAutoExclusive(True)
         self.selectBTbtn1.setObjectName("selectBTbtn1")
         self.verticalLayout.addWidget(self.selectBTbtn1)
 
-        # close side bar : icon for the the backTest window
+        # close side bar : icon for the the monte carlo window
         self.BTwindowBtn1 = QtWidgets.QPushButton(self.icon_only_widget)
         self.BTwindowBtn1.setText("")
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("UI/icon/activity-feed-32.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
-        icon2.addPixmap(QtGui.QPixmap("UI/icon/activity-feed-48.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.On)
-        self.BTwindowBtn1.setIcon(icon2)
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap("UI/icon/activity-feed-32.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon4.addPixmap(QtGui.QPixmap("UI/icon/activity-feed-48.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.On)
+        self.BTwindowBtn1.setIcon(icon4)
         self.BTwindowBtn1.setIconSize(QtCore.QSize(20, 20))
         self.BTwindowBtn1.setCheckable(True)
         self.BTwindowBtn1.setAutoExclusive(True)
@@ -138,15 +152,23 @@ class SideBarBT(object):
         self.verticalLayout_2.setObjectName("verticalLayout_2")
 
         self.configBtn2 = QtWidgets.QPushButton(self.full_menu_widget)
-        self.configBtn2.setIcon(icon)
+        self.configBtn2.setIcon(icon1)
         self.configBtn2.setIconSize(QtCore.QSize(14, 14))
         self.configBtn2.setCheckable(True)
         self.configBtn2.setAutoExclusive(True)
         self.configBtn2.setObjectName("configBtn2")
         self.verticalLayout_2.addWidget(self.configBtn2)
 
+        self.RLBtn2 = QtWidgets.QPushButton(self.full_menu_widget)
+        self.RLBtn2.setIcon(icon2)
+        self.RLBtn2.setIconSize(QtCore.QSize(14, 14))
+        self.RLBtn2.setCheckable(True)
+        self.RLBtn2.setAutoExclusive(True)
+        self.RLBtn2.setObjectName("RLBtn2")
+        self.verticalLayout_2.addWidget(self.RLBtn2)
+
         self.selectBTbtn2 = QtWidgets.QPushButton(self.full_menu_widget)
-        self.selectBTbtn2.setIcon(icon1)
+        self.selectBTbtn2.setIcon(icon3)
         self.selectBTbtn2.setIconSize(QtCore.QSize(14, 14))
         self.selectBTbtn2.setCheckable(True)
         self.selectBTbtn2.setAutoExclusive(True)
@@ -154,7 +176,7 @@ class SideBarBT(object):
         self.verticalLayout_2.addWidget(self.selectBTbtn2)
 
         self.BTwindowBtn2 = QtWidgets.QPushButton(self.full_menu_widget)
-        self.BTwindowBtn2.setIcon(icon2)
+        self.BTwindowBtn2.setIcon(icon4)
         self.BTwindowBtn2.setIconSize(QtCore.QSize(14, 14))
         self.BTwindowBtn2.setCheckable(True)
         self.BTwindowBtn2.setAutoExclusive(True)
@@ -216,8 +238,12 @@ class SideBarBT(object):
         self.stackedWidget.setObjectName("stackedWidget")
 
         # BT configuration page
-        self.BTconfigurationPage = UISelectionMenu(selectedStrat,emitterInstance)
+        self.BTconfigurationPage = UISelectionMenu(selectedStrat,emitterInstance,strategies_path)
         self.stackedWidget.addWidget(self.BTconfigurationPage)
+
+        # RL page
+        self.RLPage = UIRLMenu()
+        self.stackedWidget.addWidget(self.RLPage)
 
         # BT page
         self.BTDisplay = QtWidgets.QWidget()
@@ -257,9 +283,11 @@ class SideBarBT(object):
         self.changeBtn.toggled['bool'].connect(self.icon_only_widget.setVisible) # type: ignore
         self.changeBtn.toggled['bool'].connect(self.full_menu_widget.setHidden) # type: ignore
         self.configBtn1.toggled['bool'].connect(self.configBtn2.setChecked) # type: ignore
+        self.RLBtn1.toggled['bool'].connect(self.RLBtn2.setChecked)
         self.selectBTbtn1.toggled['bool'].connect(self.selectBTbtn2.setChecked) # type: ignore
         self.BTwindowBtn1.toggled['bool'].connect(self.BTwindowBtn2.setChecked) # type: ignore
         self.configBtn2.toggled['bool'].connect(self.configBtn1.setChecked) # type: ignore
+        self.RLBtn2.toggled['bool'].connect(self.RLBtn1.setChecked)
         self.selectBTbtn2.toggled['bool'].connect(self.selectBTbtn1.setChecked) # type: ignore
         self.BTwindowBtn2.toggled['bool'].connect(self.BTwindowBtn1.setChecked) # type: ignore
         self.exitBtn2.clicked.connect(MainWindow.close) # type: ignore
@@ -272,6 +300,7 @@ class SideBarBT(object):
         MainWindow.setWindowTitle(_translate(self.ObjectNameString, self.ObjectNameString))
         self.sideBarLabel3.setText(_translate(self.ObjectNameString, "Sidebar"))
         self.configBtn2.setText(_translate(self.ObjectNameString, "Configuration"))
+        self.RLBtn2.setText(_translate(self.ObjectNameString, "RL-based strategy"))
         self.selectBTbtn2.setText(_translate(self.ObjectNameString, "Display BackTest"))
         self.BTwindowBtn2.setText(_translate(self.ObjectNameString, "Monte Carlo Simulation"))
         self.exitBtn2.setText(_translate(self.ObjectNameString, "Exit"))

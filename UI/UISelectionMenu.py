@@ -1,12 +1,14 @@
+import os
 from PyQt5 import QtWidgets, QtCore
 from functools import partial
 
 from UpdateMarketThread import UpdateMarketThread
 from Emitter import Emitter
+from UI.CodeEditor import CodeEditor
+from UI.highlighter.pyHighlight import PythonHighlighter
 
-    
 class UISelectionMenu(QtWidgets.QWidget):
-    def __init__(self,selectedStrat,emitterInstance):
+    def __init__(self,selectedStrat,emitterInstance,strategies_path):
         super().__init__()
         self.selectedStrat = selectedStrat
 
@@ -129,21 +131,42 @@ class UISelectionMenu(QtWidgets.QWidget):
         layoutPush = QtWidgets.QHBoxLayout()
         layoutPush.addWidget(self.minusButton)
         layoutPush.addWidget(self.plusButton)
-        layoutPush.addWidget(self.buttonOK)
 
         # Layout for fees
         layoutFees = QtWidgets.QVBoxLayout()
         layoutFees.addWidget(labelFees)
         layoutFees.addWidget(self.lineEditFees)
         layoutFees.setAlignment(QtCore.Qt.AlignCenter)
+        
 
         # Create a vertical layout to organize all the layouts (crypto and timeframes)
+        mainLayoutLeft = QtWidgets.QVBoxLayout()
+        mainLayoutRight = QtWidgets.QVBoxLayout()
+        mainLayoutDown = QtWidgets.QHBoxLayout()
+        mainLayoutUp = QtWidgets.QHBoxLayout()
         mainLayout = QtWidgets.QVBoxLayout()
-        mainLayout.addLayout(layoutExchDate)
-        mainLayout.addLayout(layoutHTimeframes)
-        mainLayout.addLayout(layoutCryptoSize)
-        mainLayout.addLayout(layoutPush)
-        mainLayout.addLayout(layoutFees)
+        mainLayoutLeft.addLayout(layoutExchDate)
+        mainLayoutLeft.addLayout(layoutHTimeframes)
+        mainLayoutLeft.addLayout(layoutCryptoSize)
+        mainLayoutLeft.addLayout(layoutPush)
+        mainLayoutLeft.addLayout(layoutFees)
+
+        labelCodeEditor = QtWidgets.QLabel("Python Code For Your Strategy")
+        self.editor = CodeEditor()
+        self.editor.load_strat_code() 
+        self.highlighter = PythonHighlighter(self.editor.document())
+        self.saveStrategyButton = QtWidgets.QPushButton('Save Strategy')
+        self.saveStrategyButton.setFixedSize(120, 30)
+        self.saveStrategyButton.clicked.connect(lambda:self.saveStrategy(strategies_path))
+        mainLayoutRight.addWidget(labelCodeEditor, alignment=QtCore.Qt.AlignCenter)
+        mainLayoutRight.addWidget(self.editor)
+        mainLayoutRight.addWidget(self.saveStrategyButton, alignment=QtCore.Qt.AlignCenter)
+        
+        mainLayoutUp.addLayout(mainLayoutLeft)
+        mainLayoutUp.addLayout(mainLayoutRight)
+        mainLayoutDown.addWidget(self.buttonOK,alignment=QtCore.Qt.AlignCenter)
+        mainLayout.addLayout(mainLayoutUp)
+        mainLayout.addLayout(mainLayoutDown)
         
         # put sub widgets inside the main widget
         self.setLayout(mainLayout)
@@ -258,3 +281,14 @@ class UISelectionMenu(QtWidgets.QWidget):
 
     def updateStrat(self,stratName):
         self.selectedStrat = stratName
+
+    
+    def saveStrategy(self,strategies_path):    
+        code_content = self.editor.toPlainText()
+        strategy_name = (code_content.split('class ')[1]).split('(')[0]
+        file_path = os.path.join(strategies_path, f"{strategy_name}.py")
+        print(file_path)
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(code_content)
+        
+        
