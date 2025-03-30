@@ -1,9 +1,6 @@
 import ta
- # add your own indicator and conditions to take the trade
+# add your own indicator and conditions to take the trade
 class YourStrategy():
-    """
-This strategy is based on both bollinger and moving average. It is a tendance strategy
-"""
     def __init__(
         self,
         df,
@@ -48,53 +45,52 @@ This strategy is based on both bollinger and moving average. It is a tendance st
 
         # set the leverage you want
         self.leverage = leverage
-        
-    def setIndicators(self):
-        # -- Clear dataset --
-        df = self.df
 
-        # your indicators
-        
-        self.df = df    
-        return self.df
+def setIndicators(self):
+    # -- Clear dataset --
+    df = self.df
+
+    # your indicators
+
+    self.df = df    
+    return self.df
+
+def setShortLong(self): 
+    df = self.df
+    # -- Initiate populate --
+    self.longCondition = False
+    self.shortCondition = False
+    self.closeLongCondition = False
+    self.closeShortCondition = False
     
-    def setShortLong(self): 
-        df = self.df
-        # -- Initiate populate --
-        self.longCondition = False
-        self.shortCondition = False
-        self.closeLongCondition = False
-        self.closeShortCondition = False
+    if self.use_long:
+        # -- open long market --
+        # write your conditions here
+        condition4 = (self.usdt>0)
+        if  :
+            self.longCondition = True
+            self.isLong = True
         
-        if self.use_long:
-            # -- open long market --
-            # write your conditions here
-            condition4 = (self.usdt>0)
-            if  :
-                self.longCondition = True
-                self.isLong = True
-            
-            # -- close long market --
-            # write your conditions here
-            condition2 = self.isLong
-            if condition1 and condition2:
-                self.closeLongCondition = True
-                self.isLong = False
-        
-        if self.use_short:
-            # -- open short market --
-            # write your conditions here
-            condition4 = (self.usdt>0)
-            if :
-                self.shortCondition = True
-                self.isShort = True
+        # -- close long market --
+        # write your conditions here
+        condition2 = self.isLong
+        if condition1 and condition2:
+            self.closeLongCondition = True
+            self.isLong = False
+    
+    if self.use_short:
+        # -- open short market --
+        # write your conditions here
+        condition4 = (self.usdt>0)
+        if :
+            self.shortCondition = True
+            self.isShort = True
 
-            # -- close short market --
-            # write your conditions here
-            condition2 = self.isShort
-            if :
-                self.closeShortCondition = True
-                self.isShort = False
+        # -- close short market --
+        # write your conditions here
+        condition2 = self.isShort
+        if :
+            self.closeShortCondition = True
+            self.isShort = False
 
-        return None
-
+    return None

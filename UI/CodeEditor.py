@@ -387,7 +387,7 @@ from gym import spaces
 
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('/Users/guillaumepoidatz/Documents/VENV/baselinesTest/lib/python3.12/site-packages/gym/envs/rlstock/Data_Daily_Stock_Dow_Jones_30/dow_jones_30_daily_price.csv')
+df = pd.read_csv('/Users/guillaumepoidatz/Documents/VENV/baselinesTest2/lib/python3.11/site-packages/gym/envs/rlstock/Data_Daily_Stock_Dow_Jones_30/dow_jones_30_daily_price.csv')
 
 def data_preprocess_train(df):
     data_1=df.copy()

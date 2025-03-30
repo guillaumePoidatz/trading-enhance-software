@@ -242,7 +242,7 @@ class SideBarBT(object):
         self.stackedWidget.addWidget(self.BTconfigurationPage)
 
         # RL page
-        self.RLPage = UIRLMenu()
+        self.RLPage = UIRLMenu(strategies_path)
         self.stackedWidget.addWidget(self.RLPage)
 
         # BT page

@@ -287,7 +287,6 @@ class UISelectionMenu(QtWidgets.QWidget):
         code_content = self.editor.toPlainText()
         strategy_name = (code_content.split('class ')[1]).split('(')[0]
         file_path = os.path.join(strategies_path, f"{strategy_name}.py")
-        print(file_path)
         with open(file_path, "w", encoding="utf-8") as file:
             file.write(code_content)
         
