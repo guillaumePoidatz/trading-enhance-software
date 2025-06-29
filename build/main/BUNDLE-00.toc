@@ -1,3 +1,0 @@
-([('main',
-   '/Users/guillaumepoidatz/Documents/VENV/BackTest/dist/main',
-   'EXECUTABLE')],)

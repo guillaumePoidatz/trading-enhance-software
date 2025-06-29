@@ -10,4 +10,5 @@ And the possibility to assess a multi asset trading strategy with risk managemen
 <img width="1512" alt="Capture d’écran 2025-04-09 à 23 18 24" src="https://github.com/user-attachments/assets/d742e948-f550-4eb9-a6e9-9d493e4e4a1c" />
 <img width="1439" alt="Capture d’écran 2024-03-10 à 00 58 42" src="https://github.com/guillaumePoidatz/BackTest/assets/79081686/3d3390a3-8e4d-4350-bf5f-b61a1c9292f4">
 
+## Not anymore available
 **You can use the project with just opening the executable in folder dist. (only works with  UNIX system)**
