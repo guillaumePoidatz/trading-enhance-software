@@ -1,0 +1,24 @@
+[project]
+name = "trading-enhance-software"
+version = "0.1.0"
+description = "This software has the ambition to become a game changer in automic trading"
+authors = [
+    {name = "guillaume poidatz",email = "79081686+guillaumePoidatz@users.noreply.github.com"}
+]
+license = {text = "GPL-3.0"}
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas (>=2.3.0,<3.0.0)",
+    "numpy (>=2.3.1,<3.0.0)",
+    "PyQt5 (>=5.15.11,<6.0.0)",
+    "ccxt (>=4.4.91,<5.0.0)",
+    "mplcursors",
+    "ray",
+    "ta"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
