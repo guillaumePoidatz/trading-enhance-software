@@ -17,6 +17,7 @@ from stable_baselines3.common.monitor import *
 
 from importlib import import_module
 
+# BE CAREFUL ! THIS SCRIPT IS DEPRECATED
 # not always necessary
 try:
     from mpi4py import MPI
