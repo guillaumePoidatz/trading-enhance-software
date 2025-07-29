@@ -4,7 +4,6 @@ from trading_enhance_software.ui.highlighter.py_highlight import PythonHighlight
 import subprocess
 import os
 
-
 class UIRLMenu(QtWidgets.QWidget):
     def __init__(self, strategies_path):
         super().__init__()
@@ -46,7 +45,7 @@ class UIRLMenu(QtWidgets.QWidget):
 
     def start_training_one_asset(self):
         cd = os.getcwd()
-        command = ["python", cd + "/RLTraining/oneAssetTrading.py"]
+        command = ["python", cd + "/rl_training/one_asset_trading.py"]
 
         result = subprocess.run(command)
 
@@ -54,7 +53,7 @@ class UIRLMenu(QtWidgets.QWidget):
         cd = os.getcwd()
         command = [
             "python",
-            cd + "/RLTraining/multipleAssetManagement.py",
+            cd + "/rl_training/multiple_asset_management.py",
             "--alg=ddpg",
             "--env=RLStock-v0",
             "--network=MlpPolicy",
