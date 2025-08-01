@@ -4,5 +4,5 @@
 ## Motivation
 <!-- Why is this change necessary? -->
 
-## Reesources
+## Ressources
 <!-- Links to any needed ressources -->
