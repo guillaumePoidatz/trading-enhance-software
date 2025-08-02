@@ -3,8 +3,15 @@ from trading_enhance_software.ui.code_editor import CodeEditor
 from trading_enhance_software.ui.highlighter.py_highlight import PythonHighlighter
 import subprocess
 import os
+from trading_enhance_software.utils.google_cloud_utils import GoogleCloudTrainer
+from rl_finance_framework import one_asset_trading, multiple_asset_management
 
 class UIRLMenu(QtWidgets.QWidget):
+    """User interface for the Reinforcement Learning menu.
+
+    Args:
+        QtWidgets (_type_): 
+    """
     def __init__(self, strategies_path):
         super().__init__()
 
@@ -43,17 +50,35 @@ class UIRLMenu(QtWidgets.QWidget):
         self.setLayout(main_layout)
         self.adjustSize()
 
-    def start_training_one_asset(self):
         cd = os.getcwd()
-        command = ["python", cd + "/rl_training/one_asset_trading.py"]
+        parent_cd = os.path.dirname(cd)
+        self.google_cloud_trainer = GoogleCloudTrainer(parent_cd + "/trading-enhance-software-pog-admin.json")
 
-        result = subprocess.run(command)
+    def start_training_one_asset(self):
+        """start the training of the one asset RL algorithm.
+        """
+
+        project_id = "trading-enhance-software"
+        bucket_name = "trading-enhance-software-one-asset"
+        trainer_blob_name = "code/trainer_one_asset.tar.gz"
+        region = "europe-west1"
+        local_training_code_directory = "rl_finance_framework"
+        display_name = "training-one-asset-rl"
+        code_entry_point = "one_asset_trading"
+
+        self.google_cloud_trainer.set_bucket_lifecycle(bucket_name)
+
+        self.google_cloud_trainer.upload_training_package(local_training_code_directory, bucket_name, trainer_blob_name)
+        
+        self.google_cloud_trainer.submit_vertex_job(project_id, region, bucket_name, trainer_blob_name,display_name,code_entry_point)
 
     def start_training_multi_asset(self):
+        """start the training of the multi asset RL algorithm.
+        """
         cd = os.getcwd()
         command = [
             "python",
-            cd + "/rl_training/multiple_asset_management.py",
+            cd + "/multiple_asset_management.py",
             "--alg=ddpg",
             "--env=RLStock-v0",
             "--network=MlpPolicy",

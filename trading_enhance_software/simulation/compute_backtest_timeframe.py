@@ -1,9 +1,9 @@
 import pandas as pd
 from simulation.compute_one_trade import compute_one_trade
-from utils.simulation_utils import compute_win_loss_ratio
-from utils.simulation_utils import compute_long_win_loss_ratio
-from utils.simulation_utils import compute_short_win_loss_ratio
-from utils.simulation_utils import compute_year_results
+from trading_enhance_software.simulation.utils import compute_win_loss_ratio
+from trading_enhance_software.simulation.utils import compute_long_win_loss_ratio
+from trading_enhance_software.simulation.utils import compute_short_win_loss_ratio
+from trading_enhance_software.simulation.utils import compute_year_results
 
 
 def compute_backtest_timeframe(
