@@ -213,3 +213,6 @@ __marimo__/
 to_cancel/
 data_folder
 results/
+
+# admin credentials
+trading-enhance-software-pog-admin.json

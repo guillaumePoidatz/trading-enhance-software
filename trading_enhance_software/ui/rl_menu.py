@@ -3,8 +3,20 @@ from trading_enhance_software.ui.code_editor import CodeEditor
 from trading_enhance_software.ui.highlighter.py_highlight import PythonHighlighter
 import subprocess
 import os
+import logging
+
+from trading_enhance_software.ui.code_editor import CodeEditor
+from trading_enhance_software.ui.highlighter.py_highlight import PythonHighlighter
+from trading_enhance_software.utils.google_cloud_utils import GoogleCloudTrainer
+
+log = logging.getLogger(__name__)
 
 class UIRLMenu(QtWidgets.QWidget):
+    """User interface for the Reinforcement Learning menu.
+
+    Args:
+        QtWidgets (_type_): 
+    """
     def __init__(self, strategies_path):
         super().__init__()
 
@@ -43,17 +55,46 @@ class UIRLMenu(QtWidgets.QWidget):
         self.setLayout(main_layout)
         self.adjustSize()
 
-    def start_training_one_asset(self):
         cd = os.getcwd()
-        command = ["python", cd + "/rl_training/one_asset_trading.py"]
+        parent_cd = os.path.dirname(cd)
+        self.google_cloud_trainer = GoogleCloudTrainer(parent_cd + "/trading-enhance-software-pog-admin.json")
 
-        result = subprocess.run(command)
+    def start_training_one_asset(self):
+        """start the training of the one asset RL algorithm."""
+
+        project_id = "trading-enhance-software"
+        bucket_name = "trading-enhance-software-one-asset"
+        region = "europe-west1"
+        display_name = "training-one-asset-rl"
+        code_entry_point = "rl_finance_framework.one_asset_trading"
+        destination_blob_name = "trainer.tar.gz"
+
+        self.google_cloud_trainer.set_bucket_lifecycle(bucket_name)
+
+        tar_github_release_url = self.google_cloud_trainer.fetch_training_package()
+
+        self.google_cloud_trainer.upload_training_package(
+            tar_github_release_url,
+            bucket_name,
+            destination_blob_name,
+        )
+
+        self.google_cloud_trainer.submit_vertex_job(
+            project_id,
+            region,
+            bucket_name,
+            destination_blob_name,
+            display_name,
+            code_entry_point,
+        )
 
     def start_training_multi_asset(self):
+        """start the training of the multi asset RL algorithm.
+        """
         cd = os.getcwd()
         command = [
             "python",
-            cd + "/rl_training/multiple_asset_management.py",
+            cd + "/multiple_asset_management.py",
             "--alg=ddpg",
             "--env=RLStock-v0",
             "--network=MlpPolicy",
