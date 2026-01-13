@@ -18,7 +18,7 @@ dependencies = [
     "google-cloud-aiplatform",
     "google-cloud-storage",
     "google-auth",
-    "rl-finance-framework @ git+https://github.com/guillaumePoidatz/rl-finance-framework.git@CH-00001-create-the-package"
+    "rl-finance-framework @ git+https://github.com/guillaumePoidatz/rl-finance-framework.git@main"
 ]
 
 [build-system]

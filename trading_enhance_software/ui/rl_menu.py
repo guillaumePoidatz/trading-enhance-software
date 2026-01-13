@@ -3,8 +3,13 @@ from trading_enhance_software.ui.code_editor import CodeEditor
 from trading_enhance_software.ui.highlighter.py_highlight import PythonHighlighter
 import subprocess
 import os
+import logging
+
+from trading_enhance_software.ui.code_editor import CodeEditor
+from trading_enhance_software.ui.highlighter.py_highlight import PythonHighlighter
 from trading_enhance_software.utils.google_cloud_utils import GoogleCloudTrainer
-from rl_finance_framework import one_asset_trading, multiple_asset_management
+
+log = logging.getLogger(__name__)
 
 class UIRLMenu(QtWidgets.QWidget):
     """User interface for the Reinforcement Learning menu.
@@ -55,22 +60,33 @@ class UIRLMenu(QtWidgets.QWidget):
         self.google_cloud_trainer = GoogleCloudTrainer(parent_cd + "/trading-enhance-software-pog-admin.json")
 
     def start_training_one_asset(self):
-        """start the training of the one asset RL algorithm.
-        """
+        """start the training of the one asset RL algorithm."""
 
         project_id = "trading-enhance-software"
         bucket_name = "trading-enhance-software-one-asset"
-        trainer_blob_name = "code/trainer_one_asset.tar.gz"
         region = "europe-west1"
-        local_training_code_directory = "rl_finance_framework"
         display_name = "training-one-asset-rl"
-        code_entry_point = "one_asset_trading"
+        code_entry_point = "rl_finance_framework.one_asset_trading"
+        destination_blob_name = "trainer.tar.gz"
 
         self.google_cloud_trainer.set_bucket_lifecycle(bucket_name)
 
-        self.google_cloud_trainer.upload_training_package(local_training_code_directory, bucket_name, trainer_blob_name)
-        
-        self.google_cloud_trainer.submit_vertex_job(project_id, region, bucket_name, trainer_blob_name,display_name,code_entry_point)
+        tar_github_release_url = self.google_cloud_trainer.fetch_training_package()
+
+        self.google_cloud_trainer.upload_training_package(
+            tar_github_release_url,
+            bucket_name,
+            destination_blob_name,
+        )
+
+        self.google_cloud_trainer.submit_vertex_job(
+            project_id,
+            region,
+            bucket_name,
+            destination_blob_name,
+            display_name,
+            code_entry_point,
+        )
 
     def start_training_multi_asset(self):
         """start the training of the multi asset RL algorithm.

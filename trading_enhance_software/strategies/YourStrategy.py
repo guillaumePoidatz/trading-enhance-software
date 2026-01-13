@@ -19,7 +19,6 @@ class YourStrategy():
         enter_price_long = None,
         close_price_short = None,
         close_price_long = None,
-        leverage = 1
     ):
         # dataFrame for testing
         self.df = df
